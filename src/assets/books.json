@@ -1,0 +1,36 @@
+[{
+    "id": 1,
+    "name": "Politics of Opportunism",
+    "autherName": "R P N Singh",
+    "price": 300,
+    "language": "English"
+  },
+  {
+    "id": 2,
+    "name": "Obama: The Call of History",
+    "autherName": "Peter Baker",
+    "price": 700,
+    "language": "English"
+  },
+  {
+    "id": 3,
+    "name": "Mrityunjaya",
+    "autherName": "Shivaji Sawant",
+    "price": 945,
+    "language": "Marathi"
+  },
+  {
+    "id": 4,
+    "name": "Musafir",
+    "autherName": "Achyut Godbole",
+    "price": 1250,
+    "language": "Marathi"
+  },
+  {
+    "id": 5,
+    "name": "Maharana Pratap",
+    "autherName": "Kunwar Ishwar Singh Rathore",
+    "price": 495,
+    "language": "Hindi"
+  }
+]

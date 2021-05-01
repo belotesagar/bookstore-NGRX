@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DBSchema, openDB, IDBPDatabase } from 'idb';
+import { Observable, throwError } from 'rxjs';
+import { Tbooks } from './interfaces'
+import { catchError, tap, map } from 'rxjs/operators';
 declare var db: any;
 @Injectable({
   providedIn: 'root'
@@ -22,6 +25,51 @@ export class IndexedDBService {
     });
   }
 
+  private userUrl = 'assets/books.json';
+
+  constructor(private http: HttpClient) { }
+
+  getUsers(): Observable<Tbooks[]> {
+    return this.http.get<Tbooks[]>(this.userUrl)
+      .pipe(
+        //  tap(data => console.log('All: ' + JSON.stringify(data))),
+        catchError(this.handleError)
+      );
+  }
+
+  addUsers(data: Tbooks[]): Observable<Tbooks[]> {
+    return this.http.post<Tbooks[]>(this.userUrl, data)
+      .pipe(
+        //  tap(data => console.log('All: ' + JSON.stringify(data))),
+        catchError(this.handleError)
+      );
+  }
+
+  addProductBook(data: Tbooks[]): Observable<Tbooks[]> {
+    var transaction = db.transaction(["books"], "readwrite");
+    var objectStore = transaction.objectStore("books");
+    // data.forEach(function (book) {
+    var request = objectStore.add(data).pipe(
+      catchError(this.handleError)
+    );
+    request.onsuccess = function (event) {
+      alert("new book added successfully!");
+    };
+    return;
+    // });
+  }
+
+  private handleError(err: HttpErrorResponse) {
+    let errorMessage = '';
+    if (err.error instanceof ErrorEvent) {
+      errorMessage = `An error occurred: ${err.error.message}`;
+    } else {
+      errorMessage = `Server returned code: ${err.status}, error message is: ${err.message}`;
+    }
+    console.error(errorMessage);
+    return throwError(errorMessage);
+  }
+
   getAllRecords() {
 
     var transaction = db.transaction([this.storagename], "readwrite");
@@ -33,14 +81,16 @@ export class IndexedDBService {
     };
     let getAllStore = transaction.objectStore("books");
     let objectStoreRequest = getAllStore.getAll();
-    var data = [];
+    // var BooksData = [];
+    let BooksData: Array<Tbooks> = [];
     objectStoreRequest.onsuccess = function (event) {
       let allRecords = objectStoreRequest.result;
       allRecords.forEach(function (book) {
-        data.push(book);
+        BooksData.push(book);
       });
     }
-    return data;
+    console.log("booksdata in getAll:", BooksData);
+    return BooksData;
   }
 
   getAllCartRecords() {
@@ -55,15 +105,15 @@ export class IndexedDBService {
 
     let getAllStore = transaction.objectStore("cart");
     let objectStoreRequest = getAllStore.getAll();
-    var data = [];
+    var BooksData = [];
     objectStoreRequest.onsuccess = function (event) {
       let allRecords = objectStoreRequest.result;
       allRecords.forEach(function (book) {
-        data.push(book);
+        BooksData.push(book);
       });
     }
-    this.allCartData = data;
-    return data;
+    this.allCartData = BooksData;
+    return BooksData;
   }
 
   addProductCart(cartArr) {
@@ -89,16 +139,7 @@ export class IndexedDBService {
     }
   }
 
-  addProductBook(data) {
-    var transaction = db.transaction(["books"], "readwrite");
-    var objectStore = transaction.objectStore("books");
-    // data.forEach(function (book) {
-    var request = objectStore.add(data);
-    request.onsuccess = function (event) {
-      alert("new book added successfully!");
-    };
-    // });
-  }
+
 
   deleteInventoryProduct(index) {
     var request = db.transaction([this.storagename], "readwrite")

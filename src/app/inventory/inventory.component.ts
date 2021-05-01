@@ -4,7 +4,10 @@ import { NgForm } from '@angular/forms';
 import { map } from 'rxjs/operators';
 import { IndexedDBService } from '../indexed-db.service';
 import { Products } from '../products/products.interf';
-
+import { Store, select } from '@ngrx/store';
+import * as FetchActions from '../fetch.actions';
+import * as FetchBooks from '../fetch.selectors';
+import { Tbooks } from '../interfaces';
 @Component({
   selector: 'app-inventory',
   templateUrl: './inventory.component.html',
@@ -12,8 +15,8 @@ import { Products } from '../products/products.interf';
 })
 export class InventoryComponent implements OnInit {
   @ViewChild('userForm') userForm: NgForm;
-  constructor(private _indexedDbService: IndexedDBService) { }
-  booksData = [];
+  constructor(private _indexedDbService: IndexedDBService, private store: Store) { }
+  booksData: Tbooks[] = [];
   editMode: boolean = false;
   headers = ["id", "name", "autherName", "price", "language"];
 
@@ -46,12 +49,22 @@ export class InventoryComponent implements OnInit {
 
   items = [];
 
-  onAddProduct(data: Products) {
+  onAddProduct(data: Tbooks[]) {
+    console.log("Add Data", data);
     if (this.editMode == true) {
       this._indexedDbService.updateInventoryProduct(data);
     }
     else {
-      this._indexedDbService.addProductBook(data);
+
+      // this._indexedDbService.addProductBook(data);
+      // this._indexedDbService.addUsers(data);
+
+      this.store.dispatch(new FetchActions.LoadAdds(data)); //action dispatch
+
+      this.store.pipe(select(FetchBooks.addBooks)).subscribe(users => {
+        console.log('inventry add@@@@@@@@@@', users);
+        this.booksData = users;
+      })
     }
   }
 

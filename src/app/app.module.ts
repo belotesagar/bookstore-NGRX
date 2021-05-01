@@ -9,6 +9,12 @@ import { CartComponent } from './cart/cart.component';
 import { FormsModule } from '@angular/forms'
 import { HttpClientModule } from '@angular/common/http'
 import { IndexedDBService } from './indexed-db.service';
+import { StoreModule } from '@ngrx/store';
+import { reducers, metaReducers } from './reducers';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { environment } from '../environments/environment';
+import { EffectsModule } from '@ngrx/effects';
+import { FetchEffects } from './fetch.effects';
 @NgModule({
   declarations: [
     AppComponent,
@@ -21,7 +27,11 @@ import { IndexedDBService } from './indexed-db.service';
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
+    StoreModule.forRoot({}, {}),
+    StoreModule.forRoot(reducers, { metaReducers }),
+    !environment.production ? StoreDevtoolsModule.instrument() : [],
+    EffectsModule.forRoot([FetchEffects])
   ],
   providers: [IndexedDBService],
   bootstrap: [AppComponent]
